@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find v9_ball_detector)/launch/v9_ball_detector.launch"/>
+
+    <node pkg="v11_cat2_detector" type="v11_cat2_detector_node" name="v11_cat2_detector_node" output="screen" >
+<!--             <param name="variance" type="double" value="2.0" />    -->
+        <remap from="/v11_cat2_detector_node/image_in" to="/img_input_node/image_out" />
+        <remap from="/v11_cat2_detector_node/camera_info_in" to="/usb_cam/camera_info" />
+        <remap from="/v11_cat2_detector_node/frame_mode" to="/cat2_monitor_node/frame_mode" />
+        <remap from="/v11_cat2_detector_node/LUT_data" to="/cat2_monitor_node/LUT_data" />
+        <remap from="/v11_cat2_detector_node/save_param" to="/cat2_monitor_node/save_param" />
+        <remap from="/v11_cat2_detector_node/square_ref" to="/cat2_monitor_node/square_ref" />
+        <!-- <remap from="/v11_cat2_detector_node/line_ref" to="/cat2_monitor_node/line_ref" /> -->
+        <remap from="/v11_cat2_detector_node/line_tip" to="/v9_localization_node/line_tip" />
+        <param name="ball_config_path" type="string" value="$(find v11_cat2_detector)/config/saved_config.yaml" />
+    </node>
+</launch>
