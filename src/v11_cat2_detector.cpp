@@ -5,7 +5,7 @@
 const float Cat2Detector::MIN_CONTOUR_AREA = 100.0f;
 const float Cat2Detector::MIN_FIELD_CONTOUR_AREA = 1600.0f;
 
-typedef std::vector<cv::Point3i> Vectors3;
+// typedef std::vector<cv::Point3i> Vectors3;
 
 Cat2Detector::Cat2Detector()
     :nh_(ros::this_node::getName()),
@@ -517,7 +517,7 @@ void scanLinePoints(cv::Mat _invert_green, cv::Mat _segmented_white, const std::
         transpose(_segmented_white, _segmented_white);
     }
     
-    Vectors3 boundary = (_orientation==0) ? _field_boundary[0] : _field_boundary[1];
+    std::vector<cv::Point3i> boundary = (_orientation==0) ? _field_boundary[0] : _field_boundary[1];
     for(size_t i = 0; i < boundary.size();
         i += 5){
         cv::Point target(boundary[i].x,-1);
@@ -787,81 +787,81 @@ void Cat2Detector::process(){
     cv::cvtColor(_lines, _lines, CV_BGR2GRAY);
 
 // #### Horizontal Line
-    cv::Mat bw;
-    cv::adaptiveThreshold(_lines, bw, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 15, -2);
+    // cv::Mat bw;
+    // cv::adaptiveThreshold(_lines, bw, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 15, -2);
 
-    cv::Mat horizontal = bw.clone();
+    // cv::Mat horizontal = bw.clone();
 
-    int horizontal_size = horizontal.cols / 7.5;
-    cv::Mat horizontalStructure = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(horizontal_size, 1));
+    // int horizontal_size = horizontal.cols / 7.5;
+    // cv::Mat horizontalStructure = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(horizontal_size, 1));
 
-    cv::erode(horizontal, horizontal, horizontalStructure, cv::Point(-1, -1));
-    cv::dilate(horizontal, horizontal, horizontalStructure, cv::Point(-1, -1));
+    // cv::erode(horizontal, horizontal, horizontalStructure, cv::Point(-1, -1));
+    // cv::dilate(horizontal, horizontal, horizontalStructure, cv::Point(-1, -1));
 
-    std::vector<std::vector<cv::Point> > contours_lines;
-    Points contour_pt_ine;
-    cv::findContours(horizontal,contours_lines, CV_RETR_TREE,CV_CHAIN_APPROX_NONE);
-    for(size_t i = 0; i < contours_lines.size(); i++){
-        // std::cout<<"cv::contourArea(contours_lines[i]) : "<<cv::contourArea(contours_lines[i])<<std::endl;
-        if(cv::contourArea(contours_lines[i]) > 150){
-            contour_pt_ine.insert(contour_pt_ine.end(), contours_lines[i].begin(), contours_lines[i].end());
-        }
-    }
+    // std::vector<std::vector<cv::Point> > contours_lines;
+    // Points contour_pt_ine;
+    // cv::findContours(horizontal,contours_lines, CV_RETR_TREE,CV_CHAIN_APPROX_NONE);
+    // for(size_t i = 0; i < contours_lines.size(); i++){
+    //     // std::cout<<"cv::contourArea(contours_lines[i]) : "<<cv::contourArea(contours_lines[i])<<std::endl;
+    //     if(cv::contourArea(contours_lines[i]) > 150){
+    //         contour_pt_ine.insert(contour_pt_ine.end(), contours_lines[i].begin(), contours_lines[i].end());
+    //     }
+    // }
 
-    cv::Mat horizontal_line = cv::Mat::zeros(thresh_image.size(), CV_8UC1);
-    if(contour_pt_ine.size()){
-        std::vector<Points > contour(1);
-        cv::convexHull(contour_pt_ine,contour[0]);
-        cv::Rect field_bound = cv::boundingRect(contour[0]);
+    // cv::Mat horizontal_line = cv::Mat::zeros(thresh_image.size(), CV_8UC1);
+    // if(contour_pt_ine.size()){
+    //     std::vector<Points > contour(1);
+    //     cv::convexHull(contour_pt_ine,contour[0]);
+    //     cv::Rect field_bound = cv::boundingRect(contour[0]);
 
-        drawContours(horizontal_line, contour, 0, cv::Scalar(255), cv::FILLED);
-    }
+    //     drawContours(horizontal_line, contour, 0, cv::Scalar(255), cv::FILLED);
+    // }
 
-    std::vector<Points > contours_lineH;
-    //for gui
-    //Approx NONE to get the authentic contours
-    cv::findContours(horizontal_line, contours_lineH, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-    for(size_t i = 0; i < contours_lineH.size(); i++){
+    // std::vector<Points > contours_lineH;
+    // //for gui
+    // //Approx NONE to get the authentic contours
+    // cv::findContours(horizontal_line, contours_lineH, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+    // for(size_t i = 0; i < contours_lineH.size(); i++){
 
-        Points outer_rect;
-        cv::convexHull(contours_lineH[i],outer_rect);
-        cv::Moments moment;
-        moment = cv::moments(outer_rect,true);
-        cv::Point line_com(moment.m10/moment.m00, moment.m01/moment.m00);
+    //     Points outer_rect;
+    //     cv::convexHull(contours_lineH[i],outer_rect);
+    //     cv::Moments moment;
+    //     moment = cv::moments(outer_rect,true);
+    //     cv::Point line_com(moment.m10/moment.m00, moment.m01/moment.m00);
                 
-        _line_pos.x = int(moment.m10/moment.m00);
-        _line_pos.y = int(moment.m01/moment.m00);
+    //     _line_pos.x = int(moment.m10/moment.m00);
+    //     _line_pos.y = int(moment.m01/moment.m00);
 
-        cv::Point line_center;
-        line_center = cv::Point(moment.m10/moment.m00,moment.m01/moment.m00);
-        cv::circle(output_view, line_center, 1, cv::Scalar(255,0,0), 3, 8, 0 );
+    //     cv::Point line_center;
+    //     line_center = cv::Point(moment.m10/moment.m00,moment.m01/moment.m00);
+    //     cv::circle(output_view, line_center, 1, cv::Scalar(255,0,0), 3, 8, 0 );
 
-        std::vector<std::vector<cv::Point> > contours_poly( contours_lineH.size() );
-        std::vector<cv::Rect> boundRect( contours_lineH.size() );
-        std::vector<cv::Point2f> centers( contours_lineH.size() );
+    //     std::vector<std::vector<cv::Point> > contours_poly( contours_lineH.size() );
+    //     std::vector<cv::Rect> boundRect( contours_lineH.size() );
+    //     std::vector<cv::Point2f> centers( contours_lineH.size() );
 
-        cv::approxPolyDP( contours_lineH[i], contours_poly[i], 3, true );
-        boundRect[i] = cv::boundingRect( contours_poly[i] );
+    //     cv::approxPolyDP( contours_lineH[i], contours_poly[i], 3, true );
+    //     boundRect[i] = cv::boundingRect( contours_poly[i] );
 
-        cv::Mat output_view_roi(output_view,boundRect[i]);
-        cv::Mat square_region(output_view_roi.size(),CV_8UC3,cv::Scalar(255,50,50));
-        square = square_region.clone();
-        cv::addWeighted(output_view_roi, .5, square_region, .5, .0,output_view_roi);
+    //     cv::Mat output_view_roi(output_view,boundRect[i]);
+    //     cv::Mat square_region(output_view_roi.size(),CV_8UC3,cv::Scalar(255,50,50));
+    //     square = square_region.clone();
+    //     cv::addWeighted(output_view_roi, .5, square_region, .5, .0,output_view_roi);
 
-        if(!contours_lineH.size()){
-            line_pos_.x = -1;
-            line_pos_.y = -1;
-            line_pos_.z = 0;
-        }else {
-            line_pos_.x = _line_pos.x;
-            line_pos_.y = _line_pos.y;
-            line_pos_.z = 0;
-        }
+    //     if(!contours_lineH.size()){
+    //         line_pos_.x = -1;
+    //         line_pos_.y = -1;
+    //         line_pos_.z = 0;
+    //     }else {
+    //         line_pos_.x = _line_pos.x;
+    //         line_pos_.y = _line_pos.y;
+    //         line_pos_.z = 0;
+    //     }
 
-        std::cout<<"line_pos_.x : "<<line_pos_.x<<std::endl;
-        std::cout<<"line_pos_.y : "<<line_pos_.y<<std::endl;
+    //     std::cout<<"line_pos_.x : "<<line_pos_.x<<std::endl;
+    //     std::cout<<"line_pos_.y : "<<line_pos_.y<<std::endl;
 
-    }  
+    // }  
     
 // #### Vertical Line
     // //BEGINNING OF COMMENT
@@ -929,7 +929,7 @@ void Cat2Detector::process(){
     //Hough Line dari skeleton
     std::vector<cv::Vec4i> lines;
     HoughLinesP(skel,lines,2, CV_PI/180,80,0,30);
-
+    
     // remove small lines
     std::vector<cv::Vec4i> linesWithoutSmall;
     std::copy_if (lines.begin(), lines.end(), std::back_inserter(linesWithoutSmall), [](cv::Vec4f line){
@@ -1002,7 +1002,7 @@ void Cat2Detector::process(){
 
     std::vector<cv::Vec4i> garis_hor;
     std::vector<cv::Vec4i> garis_ver;
-    cv::Point p1, p2;
+    // cv::Point p1, p2;
     cv::Mat frameclone = in_img_.clone();
     for(cv::Vec4i reduced: reducedLines){
         //cv::line(frameclone, cv::Point(reduced[0], reduced[1]), cv::Point(reduced[2], reduced[3]), cv::Scalar(255, 0, 0), 2);
@@ -1013,21 +1013,30 @@ void Cat2Detector::process(){
             p2=cv::Point(reduced[2], reduced[3]);
 
             double angle = (atan2 ( fabs(p2.y-p1.y)*1.0 , fabs(p2.x-p1.x)*1.0))*(180/CV_PI);
+            double center_x = (reduced[2]+reduced[0])/2;
+            double center_y = (reduced[3]+reduced[1])/2;
             
             /*
             std::cout <<"Point 1" <<p1 <<",  Point 2"<< p2
                               << "  angle :" << angle
                               <<'\n';
             */
-
+             std::cout<<"center.x : "<<center_x<<std::endl;
+            std::cout<<"center.y : "<<center_y<<std::endl;
             //horizontal lines
                 if( angle < 45 && angle > 0)
                     {
-                    garis_hor.push_back(reduced);
+                    // garis_hor.push_back(reduced);
+                    cv::line(output_view, p1, p2, cv::Scalar(255,0,0), 3, cv::LINE_AA); //biru
+                    cv::circle(output_view, cv::Point(center_x,center_y),6,cv::Scalar(0,255,0),-1,8,0);
+
                     //line( horizontal, p1, p2, Scalar(0,0,255), 3, CV_AA);
                     }
-                if(angle >= 45){
-                    garis_ver.push_back(reduced);
+                else if(angle >= 45){
+                    // garis_ver.push_back(reduced);
+                    cv::line(output_view, p1, p2, cv::Scalar(0,0,255), 3, cv::LINE_AA); //merah
+                    cv::circle(output_view, cv::Point(center_x,center_y),6,cv::Scalar(0,0,0),-1,8,0);
+
                 }
 
         //circle(frameclone, Point(x,y),3,Scalar(255,0,0),-1,8,0);
@@ -1075,7 +1084,7 @@ void Cat2Detector::process(){
     //         line_pos_.z = 0;
     //     }
 
-    //garis vertikal
+//     //garis vertikal
     for( size_t i = 0; i < garis_ver.size(); i++ ){
      cv::Vec4i garis_vertikal = garis_ver[i]; 
      cv::Point point1, point2;
